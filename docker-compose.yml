@@ -1,0 +1,61 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+version: "3.1"
+services:
+
+  redis:
+    image: redis:alpine
+    container_name: php-redis
+    ports:
+      - '6379:6379'
+
+  #  mysql:
+  #    image: mysql:5.6
+  #    container_name: php-mysql
+  #    working_dir: /application
+  #    volumes:
+  #      - .:/application
+  #    environment:
+  #      - MYSQL_ROOT_PASSWORD=123456
+  #      - MYSQL_DATABASE=education
+  #      - MYSQL_USER=swoole
+  #      - MYSQL_PASSWORD=swoole
+  #    ports:
+  #  - "8082:3306"
+
+  #    elasticsearch:
+  #      image: elasticsearch:5.6
+  #      container_name: jiaoyujia-elasticsearch
+
+
+  webserver:
+    image: nginx:alpine
+    container_name: php-webserver
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./dockerEnv/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+#      - ./phpdocker/nginx/vhosts:/etc/nginx/conf.d
+    ports:
+      - "8080:80"
+    links:
+      - php-swoole
+
+
+  php-swoole:
+    build: dockerEnv
+    container_name: php-swoole
+    working_dir: /application
+    links:
+      - redis
+    volumes:
+      - ./:/application:rw
+    ports:
+      - "9501:9501"
+      - "9502:9502"
+      - "9503:9503"
+
+    stdin_open: true
+    tty: true
+
