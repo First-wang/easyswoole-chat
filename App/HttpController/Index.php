@@ -28,17 +28,6 @@ class Index extends ViewController
 //        $this->render('aaa');     # 对应模板: Views/aaa.blade.php
 
         $this->render('index');
-
-//        /**
-//         * @var \Redis $redis
-//         */
-//        $redis = PoolManager::getInstance()->getPool(RedisPool::class)->getObj();
-//
-//        $res = $redis->getKeys('room:*');
-//
-//        var_dump($res);
-//
-//        PoolManager::getInstance()->getPool(RedisPool::class)->recycleObj($redis);
     }
 
     /**
@@ -47,7 +36,7 @@ class Index extends ViewController
     public function start()
     {
         $params = $this->request()->getRequestParam();
-        $user_name = $params['user_name'] ?? time();
+        $user_name = $params['user_name'] ?? '游客' . time();
         $current_room_id = $params['room_id'] ?? '';
 
         // redis操作==============================================
@@ -83,6 +72,7 @@ class Index extends ViewController
         $params = $this->request()->getRequestParam();
 
         $name = $params['room_name'];
+        $user_name = $params['user_name'];
 
         $redis = PoolManager::getInstance()->getPool(RedisPool::class)->getObj();
 
@@ -92,12 +82,15 @@ class Index extends ViewController
         ];
 
         try {
-            $redis->set('room:' . time() . random_int(100, 999), json_encode($data));
+            $key = time() . random_int(100, 999);
+            $redis->set('room:' . $key, json_encode($data));
         } catch (\Exception $e) {
             var_dump($e);
         }
 
         PoolManager::getInstance()->getPool(RedisPool::class)->recycleObj($redis);
+
+        $this->response()->redirect("/start?user_name={$user_name}&room_id={$key}");
     }
 
     /**

@@ -12,7 +12,7 @@
            <form action="/start" method="GET">
 
                <div class="form-group">
-                   <label for="inputName">昵称:</label>
+                   <label for="inputName">输入昵称，加入聊天室：</label>
                    <input type="text" class="form-control" name="user_name" id="inputName" aria-describedby="emailHelp">
                </div>
 

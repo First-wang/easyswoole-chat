@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 
+use App\Process\ProcessRedis;
 use App\Utility\Pool\RedisObject;
 use App\Utility\Pool\RedisPool;
 use App\WebSocket\WebSocketParser;
@@ -33,10 +34,17 @@ class EasySwooleEvent implements Event
 
     public static function mainServerCreate(EventRegister $register)
     {
+        /**
+         * 除了进程名，其余参数非必须
+         */
+        $myProcess = new ProcessRedis("processRedis", null,false,2,true);
+        ServerManager::getInstance()->getSwooleServer()->addProcess($myProcess->getProcess());
+
         $register->add($register::onWorkerStart, function (\swoole_server $server, int $workerId) {
+            var_dump('服务启动' . $workerId);
             if ($server->taskworker == false) {
                 //每个worker进程都预创建连接
-                PoolManager::getInstance()->getPool(RedisPool::class)->preLoad(2);//最小创建数量
+                PoolManager::getInstance()->getPool(RedisPool::class)->preLoad(5);//最小创建数量
             }
         });
 
@@ -48,15 +56,16 @@ class EasySwooleEvent implements Event
 
                     $room_id = $request->get['room_id'];
 
-                    $redis->sAdd('fds', $request->fd);
+                    if ($room_id != '') {
+                        $redis->sAdd('fds', $request->fd);
 
-                    $redis->set('fd:' . $request->fd, $user_name);
+                        $redis->set('fd:' . $request->fd, $user_name);
 
-                    $roomInfo = json_decode($redis->get('room:' . $room_id), true);
-                    $roomInfo['fds'][] = $request->fd;
+                        $roomInfo = json_decode($redis->get('room:' . $room_id), true);
+                        $roomInfo['fds'][] = $request->fd;
 
-                    $redis->set('room:' . $room_id, json_encode($roomInfo));
-
+                        $redis->set('room:' . $room_id, json_encode($roomInfo));
+                    }
                 });
 
             } catch (\Throwable $throwable) {
@@ -68,6 +77,8 @@ class EasySwooleEvent implements Event
             try {
                 RedisPool::invoke(function(RedisObject $redis) use ($fd) {
                     $redis->SREM('fds', $fd);
+
+                    $redis->del('fd:' . $fd);
                 });
             } catch (\Throwable $throwable) {
                 var_dump($throwable->getMessage());

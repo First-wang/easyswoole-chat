@@ -5,8 +5,24 @@
     <div class="container">
 
         <div class="row">
-            <div class="col-md-2 mt-3">
-                {{--<div><button id="add-room" class="bg-light">创建房间</button></div>--}}
+            <div class="col-md-3 mt-3">
+
+                <p>
+                    <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                        创建房间（如果没房间请先创建)
+                    </a>
+                </p>
+                <div class="collapse" id="collapseExample">
+                    <div class="card card-body">
+                        <form action="/rooms?user_name={{ $user_name }}" method="POST">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">房间名称:</label>
+                                <input type="text" class="form-control" id="exampleInputEmail1" name="room_name">
+                            </div>
+                            <button type="submit" class="btn btn-primary">创建房间</button>
+                        </form>
+                    </div>
+                </div>
 
                 @if (isset($rooms))
                     <ul id="room-list">
@@ -24,14 +40,25 @@
                 @endif
             </div>
 
-            <div class="col-md-8 bg-info overflow-auto mt-3" style="height: 550px">
-                <div>
-                    <input type="text" class="form-control" id="input-msg">
-                </div>
+            <div class="col-md-8 mt-3">
 
-                <div id="content" class="bg-secondary mt-1"></div>
+                @if ($current_room_id != '')
+                    <div class="container overflow-auto bg-light" style="height: 550px">
+                        <div class="raw align-items-start">
+                            <div id="content" class="mt-1">
+                                <p>开始骚聊吧！！！</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="raw align-items-end">
+                        <div>
+                            <input type="text" class="form-control" id="input-msg" placeholder="回车发送">
+                        </div>
+                    </div>
+                @endif
+
+
             </div>
-
         </div>
     </div>
 
@@ -44,7 +71,7 @@
 
             var room_id = '{{ $current_room_id }}';
 
-            var wsServer = 'ws://192.168.103.115:9501?user_name=' + user_name + '&room_id=' + room_id;
+            var wsServer = 'ws://127.0.0.1:9501?user_name=' + user_name + '&room_id=' + room_id;
 
             var websocket = new WebSocket(wsServer);
             window.onload = function () {
@@ -61,6 +88,8 @@
                     str = '<div><p><span>' + msg.user_name + ':</span>' + msg.message + '</p></div>'
                     $("#content").append(str)
 
+                    $("#content").scrollTop($("#content")[0].scrollHeight);
+
                 };
                 websocket.onerror = function (evt, e) {
                     // addLine('Error occured: ' + evt.data);
@@ -69,7 +98,21 @@
 
             $("#input-msg").bind('keypress', function (event) {
                 if (event.keyCode == "13") {
+
                     message = $(this).val()
+
+                    if (message == '') {
+                        return ;
+                    }
+                    if (room_id == '') {
+                        console.log(11111);
+                        return ;
+                    }
+                    if (room_id == 'room:') {
+                        console.log(22222);
+                        return ;
+                    }
+
                     param = JSON.stringify({
                         class: 'Chat',
                         action: 'sendMsg',
