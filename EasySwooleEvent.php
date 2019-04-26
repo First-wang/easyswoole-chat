@@ -43,7 +43,19 @@ class EasySwooleEvent implements Event
         $register->add(EventRegister::onOpen, function (\swoole_websocket_server $server, $request) {
             try {
                 RedisPool::invoke(function(RedisObject $redis) use ($request) {
+
+                    $user_name = $request->get['user_name'];
+
+                    $room_id = $request->get['room_id'];
+
                     $redis->sAdd('fds', $request->fd);
+
+                    $redis->set('fd:' . $request->fd, $user_name);
+
+                    $roomInfo = json_decode($redis->get('room:' . $room_id), true);
+                    $roomInfo['fds'][] = $request->fd;
+
+                    $redis->set('room:' . $room_id, json_encode($roomInfo));
 
                 });
 

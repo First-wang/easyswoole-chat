@@ -18,7 +18,11 @@ return [
             'worker_num'       => 4,//运行的  worker进程数量
             'max_request'      => 300,// worker 完成该数量的请求后将退出，防止内存溢出
             'task_worker_num'  => 4,//运行的 task_worker 进程数量
-            'task_max_request' => 300// task_worker 完成该数量的请求后将退出，防止内存溢出
+            'task_max_request' => 300,// task_worker 完成该数量的请求后将退出，防止内存溢出
+
+            // 加入以下两条配置以返回静态文件
+            'document_root'         => EASYSWOOLE_ROOT.'/Public',  // 静态资源目录
+            'enable_static_handler' => true,
         ]
     ],
     'TEMP_DIR'      => null,//临时文件存放的目录

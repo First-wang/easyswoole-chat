@@ -24,7 +24,11 @@ class Router extends AbstractRouter
 //        $routeCollector->get('/user','/Test/user');
 //        $routeCollector->get('/test','/Index/test');
 
-        $routeCollector->get('/aaa', 'Index/aaa');
 
+        $routeCollector->get('/start', 'Index/start');
+
+        $routeCollector->get('/rooms', 'Index/createRoom');
+
+        $routeCollector->get('/into', 'Index/intoRoom');
     }
 }

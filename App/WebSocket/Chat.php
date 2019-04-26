@@ -23,12 +23,32 @@ class Chat extends Controller
     {
         $arg = $this->caller()->getArgs();
 
+        // TODO 将同步改为异步
+
+        $roomId = $arg['room_id'];
+
         $redis = PoolManager::getInstance()->getPool(RedisPool::class)->getObj();
-        $fds = $redis->SMEMBERS('fds');
-        PoolManager::getInstance()->getPool(RedisPool::class)->recycleObj($redis);
+        $effectiveFds = $redis->SMEMBERS('fds');
+
+        $roomInfo = $redis->get('room:' . $roomId);
+        $roomInfo = json_decode($roomInfo,  true);
+        $fds = $roomInfo['fds'];
+
+        $userName = $redis->get('fd:' . $fd = $this->caller()->getClient()->getFd());
+
         $server = ServerManager::getInstance()->getSwooleServer();
         foreach ($fds as $fd) {
-            $server->push($fd, $arg['message']);
+            if (in_array($fd, $effectiveFds)) {
+
+                $param = [
+                    'user_name' => $userName,
+                    'message' => $arg['message']
+                ];
+
+                $server->push($fd, json_encode($param));
+            }
         }
+
+        PoolManager::getInstance()->getPool(RedisPool::class)->recycleObj($redis);
     }
 }

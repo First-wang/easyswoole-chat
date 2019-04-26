@@ -9,26 +9,107 @@
 namespace App\HttpController;
 
 
+use App\Utility\Pool\RedisObject;
+use App\Utility\Pool\RedisPool;
 use App\Utility\TrackerManager;
+use EasySwoole\Component\Pool\PoolManager;
+use EasySwoole\EasySwoole\Logger;
 use EasySwoole\Http\AbstractInterface\Controller;
 use EasySwoole\Trace\Bean\Tracker;
+use EasySwoole\Utility\SnowFlake;
 
-class Index extends Base
+class Index extends ViewController
 {
     function index()
     {
-        $this->response()->write('666');
-        // TODO: Implement index() method.
+//        $this->response()->write('666');
+
+        // Blade View
+//        $this->render('aaa');     # 对应模板: Views/aaa.blade.php
+
+        $this->render('index');
+
+//        /**
+//         * @var \Redis $redis
+//         */
+//        $redis = PoolManager::getInstance()->getPool(RedisPool::class)->getObj();
+//
+//        $res = $redis->getKeys('room:*');
+//
+//        var_dump($res);
+//
+//        PoolManager::getInstance()->getPool(RedisPool::class)->recycleObj($redis);
     }
 
-    public function aaa()
+    /**
+     * 输入昵称，开始骚聊
+     */
+    public function start()
     {
-        return '/bbb';
+        $params = $this->request()->getRequestParam();
+        $user_name = $params['user_name'] ?? time();
+        $current_room_id = $params['room_id'] ?? '';
+
+        // redis操作==============================================
+        $redis = PoolManager::getInstance()->getPool(RedisPool::class)->getObj();
+
+        $room_keys = $redis->KEYS('room:*');
+
+        $rooms = [];
+
+        if (!empty($room_keys)) {
+            foreach ($room_keys as $room_key) {
+                $room_name = $redis->get($room_key);
+                $rooms[substr($room_key, -13, 13)] = $room_name;
+            }
+        }
+
+        // 默认进入第一个房间
+        if (!$current_room_id && !empty($rooms)) {
+            $current_room_id = substr($room_keys[0], -13, 13);
+        }
+
+        PoolManager::getInstance()->getPool(RedisPool::class)->recycleObj($redis);
+        // redis操作结束===========================================
+
+        $this->render('chat', compact('user_name', 'rooms', 'current_room_id'));
     }
 
-
-    public function bbb()
+    /**
+     * 创建房间
+     */
+    public function createRoom()
     {
-        $this->response()->write('wewe');
+        $params = $this->request()->getRequestParam();
+
+        $name = $params['room_name'];
+
+        $redis = PoolManager::getInstance()->getPool(RedisPool::class)->getObj();
+
+        $data = [
+            'name' => $name,
+            'fds' => []
+        ];
+
+        try {
+            $redis->set('room:' . time() . random_int(100, 999), json_encode($data));
+        } catch (\Exception $e) {
+            var_dump($e);
+        }
+
+        PoolManager::getInstance()->getPool(RedisPool::class)->recycleObj($redis);
     }
+
+    /**
+     * 进入房间
+     */
+    public function intoRoom()
+    {
+        $params = $this->request()->getRequestParam();
+
+        $roomId = $params['room_id'];
+
+
+    }
+
 }

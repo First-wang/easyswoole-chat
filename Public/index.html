@@ -13,14 +13,14 @@
 
 <div class="container">
     <div class="row">
-        <!--<div class="col-md-2">-->
-        <!--<div><button id="add-room" class="bg-light">创建房间</button></div>-->
-        <!--<ul id="room-list">-->
-        <!--<li id="room-1"><a href="#">房间1</a></li>-->
-        <!--<li id="room-2"><a href="#">房间1</a></li>-->
-        <!--&lt;!&ndash;<li id="room-1">房间1</li>&ndash;&gt;-->
-        <!--</ul>-->
-        <!--</div>-->
+        <div class="col-md-2">
+        <div><button id="add-room" class="bg-light">创建房间</button></div>
+        <ul id="room-list">
+        <li id="room-1"><a href="#">房间1</a></li>
+        <li id="room-2"><a href="#">房间1</a></li>
+        <!--<li id="room-1">房间1</li>-->
+        </ul>
+        </div>
         <div class="container">
             <div class="row">
                 <input type="text" class="form-control" id="input-msg">
@@ -40,68 +40,5 @@
 <script src="js/bootstrap.js"></script>
 
 <script src="js/chat.js"></script>
-
-<script>
-
-
-    $(function () {
-        var wsServer = 'ws://127.0.0.1:9501';
-        var websocket = new WebSocket(wsServer);
-        window.onload = function () {
-            websocket.onopen = function (evt) {
-                // addLine("Connected to WebSocket server.");
-            };
-            websocket.onclose = function (evt) {
-                // addLine("Disconnected");
-            };
-            websocket.onmessage = function (evt) {
-                // addLine('Retrieved data from server: ' + evt.data);
-
-                msg = evt.data
-
-                //<div class="bg-light">
-                //     <p><span>wdy</span>:</p>
-                // <p>2333333</p>
-                // </div>
-
-                str = '<div class="bg-light"><p>' + msg + '</p></div>'
-
-                $("#content").append(str)
-
-            };
-            websocket.onerror = function (evt, e) {
-                // addLine('Error occured: ' + evt.data);
-            };
-        };
-
-        $("#input-msg").bind('keypress', function (event) {
-            if (event.keyCode == "13") {
-                console.log()
-
-                message = $(this).val()
-
-                param = JSON.stringify({
-                    class: 'Chat',
-                    action: 'sendMsg',
-                    content: {
-                        message: message
-                    }
-                })
-
-                websocket.send(param)
-
-                $(this).val('')
-            }
-        })
-
-        $("#room-1").click(function () {
-
-            console.log(1111)
-
-        })
-    })
-
-
-</script>
 
 </html>
