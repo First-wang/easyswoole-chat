@@ -74,6 +74,10 @@ log dir                       /application/Log
 http://127.0.0.1:8080/
 ```
 
+#### 帮助
+
+[EASYSWOOLE文档3.X](https://www.easyswoole.com/Manual/3.x/Cn/_book/Introduction/install.html)
+
 #### 效果展示
 
 ![](http://wdy-blog-file.test.upcdn.net/images/chat_xg1.png)
