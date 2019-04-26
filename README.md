@@ -25,6 +25,9 @@ composer config -g repo.packagist composer https://packagist.laravel-china.org
 
 安装composer包
 composer install
+
+安装Easyswoole,遇到问题,选N!!!
+php vendor/bin/easyswoole install
 ```
 
 #### 项目启动
