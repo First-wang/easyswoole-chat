@@ -22,7 +22,7 @@ docker exec -it php-swoole /bin/bash
 
 使用composer中文镜像
 composer config -g repo.packagist composer https://packagist.laravel-china.org
-进入容器:
+
 安装composer包
 composer install
 ```
