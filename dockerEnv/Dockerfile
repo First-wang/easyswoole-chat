@@ -63,6 +63,6 @@ RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VERSION}.tar.gz 
 #    && composer require easyswoole/easyswoole=${EASYSWOOLE_VERSION} \
 #    && php vendor/bin/easyswoole install
 
-EXPOSE 9501
+#EXPOSE 9501
 
 #ENTRYPOINT ["php", "/var/www/code/easyswoole", "start"]
